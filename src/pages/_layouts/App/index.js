@@ -7,7 +7,7 @@ import withWidth from '@material-ui/core/withWidth';
 import useStyles from './styles';
 import logoWhite from '../../../assets/logoWhite.png';
 
-function DefaultLayout({ children, match, width }) {
+export default function DefaultLayout({ children, match, width }) {
   const dispatch = useDispatch();
   const classes = useStyles();
 
@@ -53,5 +53,3 @@ function DefaultLayout({ children, match, width }) {
     </Grid>
   );
 }
-
-export default withWidth()(DefaultLayout);

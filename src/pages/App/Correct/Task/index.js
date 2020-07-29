@@ -11,12 +11,15 @@ import {
   withStyles,
   Button,
   Checkbox,
+  IconButton,
 } from '@material-ui/core';
+
+import { ReportProblem } from '@material-ui/icons';
 
 import useStyles from './styles';
 import { Form } from '@unform/web';
 import Input from '../../../../components/Input';
-
+import history from '../../../../services/history';
 function validURL(str) {
   var pattern = new RegExp(
     '^(https?:\\/\\/)?' + // protocol
@@ -45,15 +48,14 @@ function Task() {
   const [value, setValue] = React.useState(2);
   const [value2, setValue2] = React.useState(2);
   const [value3, setValue3] = React.useState(2);
-  const [TextZero, setTextZero] = React.useState(1);
-  const [zero, setZero] = React.useState(false);
+  const [text, setText] = React.useState('');
 
   function allRight() {
     setValue(1);
     setValue2(1);
     setValue3(1);
 
-    setZero(false);
+    setText('Paraben, voce acertou tudo.');
   }
 
   function allWrong() {
@@ -66,8 +68,6 @@ function Task() {
     if (value) {
       allWrong();
     }
-
-    setZero(value);
   }
 
   return (
@@ -82,7 +82,30 @@ function Task() {
         >
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography className={classes.title}>Tarefa</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography className={classes.title}>Tarefa</Typography>
+                </Grid>
+
+                <Grid item>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={8} md={9}>
+                      <Button>
+                        <ReportProblem
+                          style={{ color: '#483699', marginRight: 10 }}
+                        />
+                        Reportar problema
+                      </Button>
+                    </Grid>
+
+                    <Grid item xs={12} sm={4} md={3}>
+                      <Button fullWidth href="/dashboard">
+                        Sair
+                      </Button>
+                    </Grid>
+                  </Grid>
+                </Grid>
+              </Grid>
             </Grid>
 
             <Grid item xs={12}>
@@ -185,52 +208,51 @@ function Task() {
                     </RadioGroup>
                   </FormControl>
                 </Grid>
-              </Grid>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Grid container spacing={1}>
                 <Grid item xs={12}>
-                  <Typography className={classes.taskTitle}>
-                    3 - O Poema Precisa Estar Bem Escrito
-                  </Typography>
-                </Grid>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12}>
+                      <Typography className={classes.taskTitle}>
+                        3 - O Poema Precisa Estar Bem Escrito
+                      </Typography>
+                    </Grid>
 
-                <Grid item xs={12}>
-                  <Typography className={classes.taskAnswer}>
-                    Poema bonitp
-                  </Typography>
-                </Grid>
+                    <Grid item xs={12}>
+                      <Typography className={classes.taskAnswer}>
+                        Poema bonitp
+                      </Typography>
+                    </Grid>
 
-                <Grid item xs={12}>
-                  <FormControl component="fieldset">
-                    <RadioGroup
-                      aria-label="gender"
-                      name="gender1"
-                      value={value3}
-                      onChange={(event) =>
-                        setValue3(Number(event.target.value))
-                      }
-                    >
-                      <Grid container spacing={2} wrap="nowrap">
-                        <Grid item>
-                          <FormControlLabel
-                            value={1}
-                            control={<CustomRadio />}
-                            label="Certo"
-                          />
-                        </Grid>
+                    <Grid item xs={12}>
+                      <FormControl component="fieldset">
+                        <RadioGroup
+                          aria-label="gender"
+                          name="gender1"
+                          value={value3}
+                          onChange={(event) =>
+                            setValue3(Number(event.target.value))
+                          }
+                        >
+                          <Grid container spacing={2} wrap="nowrap">
+                            <Grid item>
+                              <FormControlLabel
+                                value={1}
+                                control={<CustomRadio />}
+                                label="Certo"
+                              />
+                            </Grid>
 
-                        <Grid item>
-                          <FormControlLabel
-                            value={2}
-                            control={<CustomRadio />}
-                            label="Errado"
-                          />
-                        </Grid>
-                      </Grid>
-                    </RadioGroup>
-                  </FormControl>
+                            <Grid item>
+                              <FormControlLabel
+                                value={2}
+                                control={<CustomRadio />}
+                                label="Errado"
+                              />
+                            </Grid>
+                          </Grid>
+                        </RadioGroup>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
@@ -276,43 +298,34 @@ function Task() {
                 <Grid item xs={12}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={zero}
-                            onChange={(e) => zeroFunction(e.target.checked)}
-                            name="checkedB"
-                            color="primary"
-                          />
-                        }
-                        label={
-                          <Typography className={classes.label}>
-                            Zerar resposta
-                          </Typography>
-                        }
-                      />
+                      <Typography className={classes.label}>
+                        Descrição da resposta
+                      </Typography>
                     </Grid>
 
-                    {zero && (
-                      <Grid item xs={12}>
-                        <Form onSubmit={(e) => console.log(e)}>
-                          <Input
-                            name="zeroReason"
-                            label="motivo por zerar"
-                            multiline
-                          />
-                        </Form>
-                      </Grid>
-                    )}
+                    <Grid item xs={12}>
+                      <textarea
+                        value={text}
+                        className={classes.input}
+                        onChange={(e) => setText(e.target.value)}
+                        name="zeroReason"
+                        label="Descricao da correcao"
+                        multiline
+                      />
+                    </Grid>
                   </Grid>
                 </Grid>
               </Grid>
             </Grid>
 
             <Grid item style={{ marginTop: 20 }}>
-              <Button fullWidth className={classes.btn1}>
-                Enviar correção
-              </Button>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Button fullWidth className={classes.btn1}>
+                    Enviar correção
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
@@ -322,3 +335,7 @@ function Task() {
 }
 
 export default Task;
+
+//Reportar tarefa com problema do lado do botao de sair
+//trocar cor dos botoes
+// enviar correcao para corrigir

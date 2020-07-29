@@ -77,4 +77,13 @@ export default makeStyles((theme) => ({
       fontSize: 18,
     },
   },
+
+  input: {
+    width: '100%',
+    borderRadius: 5,
+    border: '1px solid #483699',
+    padding: '10px 8px',
+    minHeight: 100,
+    background: '#FBFBFB',
+  },
 }));
