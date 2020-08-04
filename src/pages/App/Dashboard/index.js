@@ -11,6 +11,8 @@ import {
 import useStyles from './styles';
 import history from '../../../services/history';
 import logo from '../../../assets/logo.svg';
+import api from '../../../services/api';
+import { toast } from 'react-toastify';
 
 const vector = [
   {
@@ -32,11 +34,31 @@ const vector = [
 
 function Dashboard() {
   const [loading, setLoading] = React.useState(false);
+  const [tasks, setTasks] = React.useState([]);
   const classes = useStyles();
 
   function handle(e) {
-    history.push(`/task/${e.number}`);
+    history.push(`/task/${e._id}`);
   }
+
+  async function getTasks() {
+    try {
+      setLoading(true);
+      const response = await api.get('/agent/user');
+
+      setTasks(response.data);
+
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      toast.error('Ocorreu algum erro, tente novamente mais tarde.');
+    }
+  }
+
+  React.useEffect(() => {
+    getTasks();
+  }, []);
+
   React.useEffect(() => console.log('Abrindo page'), []);
 
   return (
@@ -63,30 +85,27 @@ function Dashboard() {
                 </Typography>
               </Grid>
 
-              {vector.map((task) => (
-                <Grid item xs={12} sm={4} md={3}>
-                  <Button
-                    fullWidth
-                    onClick={() => handle(task)}
-                    href={`/task/${task.number}`}
-                  >
-                    <Grid container spacing={2}>
-                      <Grid
-                        item
-                        xs={12}
-                        style={{ display: 'flex', justifyContent: 'center' }}
-                      >
-                        <img src={logo} className={classes.img} />
+              {tasks &&
+                tasks.map((task) => (
+                  <Grid item xs={12} sm={4} md={3}>
+                    <Button fullWidth onClick={() => handle(task)}>
+                      <Grid container spacing={2}>
+                        <Grid
+                          item
+                          xs={12}
+                          style={{ display: 'flex', justifyContent: 'center' }}
+                        >
+                          <img src={logo} className={classes.img} />
+                        </Grid>
+                        <Grid item xs={12}>
+                          <Typography className={classes.taskName}>
+                            {`Desafio ${task.number}`}
+                          </Typography>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={12}>
-                        <Typography className={classes.taskName}>
-                          {task.name}
-                        </Typography>
-                      </Grid>
-                    </Grid>
-                  </Button>
-                </Grid>
-              ))}
+                    </Button>
+                  </Grid>
+                ))}
             </>
           )}
         </Grid>

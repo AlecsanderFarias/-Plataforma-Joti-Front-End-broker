@@ -10,16 +10,14 @@ import {
   Radio,
   withStyles,
   Button,
-  Checkbox,
-  IconButton,
+  CircularProgress,
 } from '@material-ui/core';
 
 import { ReportProblem } from '@material-ui/icons';
-
+import api from '../../../../services/api';
 import useStyles from './styles';
-import { Form } from '@unform/web';
-import Input from '../../../../components/Input';
-import history from '../../../../services/history';
+import { toast } from 'react-toastify';
+
 function validURL(str) {
   var pattern = new RegExp(
     '^(https?:\\/\\/)?' + // protocol
@@ -43,43 +41,64 @@ const CustomRadio = withStyles({
   checked: {},
 })((props) => <Radio color="default" {...props} />);
 
-function Task() {
+function Task({ data, att }) {
   const classes = useStyles();
-  const [value, setValue] = React.useState(2);
-  const [value2, setValue2] = React.useState(2);
-  const [value3, setValue3] = React.useState(2);
+  const [items, setItems] = React.useState(
+    data ? data.taskItens.map((item) => 0) : []
+  );
   const [text, setText] = React.useState('');
+  const [change, setChange] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
 
   function allRight() {
-    setValue(1);
-    setValue2(1);
-    setValue3(1);
-
-    setText('Paraben, voce acertou tudo.');
+    setItems([...data.taskItens].reverse().map((task) => task.taskItem.grade));
+    console.log(
+      [...data.taskItens].reverse().map((task) => task.taskItem.grade)
+    );
   }
 
   function allWrong() {
-    setValue(2);
-    setValue2(2);
-    setValue3(2);
+    setItems(items.map((item) => 0));
   }
 
-  function zeroFunction(value) {
-    if (value) {
-      allWrong();
+  function mark(value, index) {
+    let newVector = items;
+    newVector[index] = value;
+    setItems(newVector);
+
+    setChange(!change);
+  }
+
+  async function submit() {
+    const preArray = items;
+
+    let query = {
+      answer: data._id,
+      alert: text,
+      taskItens: preArray.reverse().map((item) => ({
+        grade: Number(item),
+      })),
+    };
+
+    try {
+      setLoading(true);
+
+      await api.post('/agent', query);
+
+      toast.success('Tarefa corrigada com sucesso.');
+      setLoading(false);
+
+      att();
+    } catch (error) {
+      toast.error('Ocorreu algum erro, tente novamente mais tarde.');
+      setLoading(false);
     }
   }
 
   return (
     <Paper className={classes.paper}>
       <Grid container spacing={2}>
-        <Grid
-          item
-          xs={7}
-          sm={8}
-          xs={12}
-          style={{ borderRight: '1px solid #483699' }}
-        >
+        <Grid item sm={8} xs={12} style={{ borderRight: '1px solid #483699' }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Grid container spacing={2}>
@@ -110,7 +129,7 @@ function Task() {
 
             <Grid item xs={12}>
               <Typography className={classes.subTitle}>
-                Desafio 1 - Somos Do Mesmo Sangue, Tu E Eu.
+                {data && `Desafio ${data.task.number} - ${data.task.title}`}
               </Typography>
             </Grid>
 
@@ -120,122 +139,44 @@ function Task() {
               </Typography>
             </Grid>
 
-            <Grid item xs={12}>
-              <Grid container spacing={1}>
-                <Grid item xs={12}>
-                  <Typography className={classes.taskTitle}>
-                    1 - Fazer A Foto Com Os Bracos Dos Membros Da Equipe
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <FormControl component="fieldset">
-                    <RadioGroup
-                      aria-label="gender"
-                      name="gender1"
-                      value={value}
-                      onChange={(event) => setValue(Number(event.target.value))}
-                    >
-                      <Grid container spacing={2} wrap="nowrap">
-                        <Grid item>
-                          <FormControlLabel
-                            value={1}
-                            control={<CustomRadio />}
-                            label="Certo"
-                          />
-                        </Grid>
-
-                        <Grid item>
-                          <FormControlLabel
-                            value={2}
-                            control={<CustomRadio />}
-                            label="Errado"
-                          />
-                        </Grid>
-                      </Grid>
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Grid>
-
-            <Grid item xs={12}>
-              <Grid container spacing={1}>
-                <Grid item xs={12}>
-                  <Typography className={classes.taskTitle}>
-                    2 - Todos Devem Estar Usando A Camisa Verde
-                  </Typography>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <Button
-                    href={'https://www.facebook.com/alecsander.souzafarias/'}
-                    target="_blank"
-                    style={{ textTransform: 'capitalize' }}
-                    className={classes.taskAnswer}
-                  >
-                    https://www.facebook.com/alecsander.souzafarias/
-                  </Button>
-                </Grid>
-
-                <Grid item xs={12}>
-                  <FormControl component="fieldset">
-                    <RadioGroup
-                      aria-label="gender"
-                      name="gender1"
-                      value={value2}
-                      onChange={(event) =>
-                        setValue2(Number(event.target.value))
-                      }
-                    >
-                      <Grid container spacing={2} wrap="nowrap">
-                        <Grid item>
-                          <FormControlLabel
-                            value={1}
-                            control={<CustomRadio />}
-                            label="Certo"
-                          />
-                        </Grid>
-
-                        <Grid item>
-                          <FormControlLabel
-                            value={2}
-                            control={<CustomRadio />}
-                            label="Errado"
-                          />
-                        </Grid>
-                      </Grid>
-                    </RadioGroup>
-                  </FormControl>
-                </Grid>
+            {data &&
+              [...data.taskItens].reverse().map((task, index) => (
                 <Grid item xs={12}>
                   <Grid container spacing={1}>
                     <Grid item xs={12}>
                       <Typography className={classes.taskTitle}>
-                        3 - O Poema Precisa Estar Bem Escrito
+                        {`${Number(index) + 1} - ${task.taskItem.agentsText}`}
                       </Typography>
                     </Grid>
 
-                    <Grid item xs={12}>
-                      <Typography className={classes.taskAnswer}>
-                        Poema bonitp
-                      </Typography>
-                    </Grid>
+                    {task.taskItem.camp && (
+                      <Grid item xs={12}>
+                        {validURL(task.answer) ? (
+                          <Button link href={`task.answer`} target="_blank">
+                            {task.answer}
+                          </Button>
+                        ) : (
+                          <Typography className={classes.taskAnswer}>
+                            {task.answer}
+                          </Typography>
+                        )}
+                      </Grid>
+                    )}
 
                     <Grid item xs={12}>
                       <FormControl component="fieldset">
                         <RadioGroup
                           aria-label="gender"
                           name="gender1"
-                          value={value3}
+                          value={items[index]}
                           onChange={(event) =>
-                            setValue3(Number(event.target.value))
+                            mark(Number(event.target.value), index)
                           }
                         >
                           <Grid container spacing={2} wrap="nowrap">
                             <Grid item>
                               <FormControlLabel
-                                value={1}
+                                value={task.taskItem.grade}
                                 control={<CustomRadio />}
                                 label="Certo"
                               />
@@ -243,7 +184,7 @@ function Task() {
 
                             <Grid item>
                               <FormControlLabel
-                                value={2}
+                                value={0}
                                 control={<CustomRadio />}
                                 label="Errado"
                               />
@@ -254,8 +195,7 @@ function Task() {
                     </Grid>
                   </Grid>
                 </Grid>
-              </Grid>
-            </Grid>
+              ))}
           </Grid>
         </Grid>
 
@@ -321,9 +261,25 @@ function Task() {
             <Grid item style={{ marginTop: 20 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
-                  <Button fullWidth className={classes.btn1}>
-                    Enviar correção
-                  </Button>
+                  {loading ? (
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <CircularProgress />
+                    </div>
+                  ) : (
+                    <Button
+                      fullWidth
+                      className={classes.btn1}
+                      onClick={() => submit()}
+                    >
+                      Enviar correção
+                    </Button>
+                  )}
                 </Grid>
               </Grid>
             </Grid>
@@ -335,7 +291,3 @@ function Task() {
 }
 
 export default Task;
-
-//Reportar tarefa com problema do lado do botao de sair
-//trocar cor dos botoes
-// enviar correcao para corrigir
