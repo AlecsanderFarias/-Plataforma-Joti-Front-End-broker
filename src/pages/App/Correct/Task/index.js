@@ -95,6 +95,22 @@ function Task({ data, att }) {
     }
   }
 
+  async function report() {
+    try {
+      setLoading(true);
+
+      await api.put(`/agent/${data._id}`);
+
+      toast.success('Tarefa reportada com sucesso.');
+      setLoading(false);
+
+      att();
+    } catch (error) {
+      toast.error('Ocorreu algum erro, tente novamente mais tarde.');
+      setLoading(false);
+    }
+  }
+
   return (
     <Paper className={classes.paper}>
       <Grid container spacing={2}>
@@ -109,7 +125,7 @@ function Task({ data, att }) {
                 <Grid item>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={8} md={9}>
-                      <Button>
+                      <Button onClick={() => report()}>
                         <ReportProblem
                           style={{ color: '#483699', marginRight: 10 }}
                         />
