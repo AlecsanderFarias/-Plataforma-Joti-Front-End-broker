@@ -14,24 +14,6 @@ import logo from '../../../assets/logo.svg';
 import api from '../../../services/api';
 import { toast } from 'react-toastify';
 
-const vector = [
-  {
-    _id: 'da5s1da2sd3as',
-    name: 'Tarefa 1',
-    number: 1,
-  },
-  {
-    _id: 'da5s1da1sd3as',
-    name: 'Tarefa 2',
-    number: 2,
-  },
-  {
-    _id: 'da5s1d72sd3as',
-    name: 'Tarefa 3',
-    number: 3,
-  },
-];
-
 function Dashboard() {
   const [loading, setLoading] = React.useState(false);
   const [tasks, setTasks] = React.useState([]);
@@ -80,12 +62,10 @@ function Dashboard() {
           ) : (
             <>
               <Grid item xs={12}>
-                <Typography className={classes.title}>
-                  Tarefas (escolha qual quer corrigir)
-                </Typography>
+                <Typography className={classes.title}>Tarefas</Typography>
               </Grid>
 
-              {tasks &&
+              {tasks && [...tasks].length > 0 ? (
                 tasks.map((task) => (
                   <Grid item xs={12} sm={4} md={3}>
                     <Button fullWidth onClick={() => handle(task)}>
@@ -105,7 +85,14 @@ function Dashboard() {
                       </Grid>
                     </Button>
                   </Grid>
-                ))}
+                ))
+              ) : (
+                <>
+                  <Typography>
+                    Voce nao tem permissao para corrigir tarefas
+                  </Typography>
+                </>
+              )}
             </>
           )}
         </Grid>
